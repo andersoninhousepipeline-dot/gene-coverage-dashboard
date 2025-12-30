@@ -542,7 +542,6 @@
             <p>Upload your gene coverage Excel file to visualize and analyze the data with advanced filters</p>
             <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem;">
                 <button class="btn btn-primary" onclick="loadBuiltInGeneCoverage()">View Built-in Gene Coverage</button>
-                <button class="btn btn-secondary" onclick="loadBuiltInHGNC()">View Built-in HGNC Data</button>
             </div>
             <div class="upload-zone" id="uploadZone">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1169,10 +1168,30 @@
             fetch('data/hgnc_complete_set.txt')
                 .then(response => response.text())
                 .then(text => {
-                    const lines = text.split('\n');
-                    const header = lines[0].split('\t');
-                    const symbolIdx = header.findIndex(h => h.toLowerCase().includes('symbol') || h.toLowerCase() === 'gene');
-                    const locationIdx = header.findIndex(h => h.toLowerCase().includes('location') || h.toLowerCase().includes('chromosome'));
+                    // Split lines in a CRLF-safe way and drop empty leading lines
+                    const rawLines = text.split(/\r?\n/);
+                    const lines = rawLines.filter(l => l && l.trim().length > 0);
+                    if (lines.length === 0) {
+                        document.getElementById('chrStatus').className = 'chr-status';
+                        document.getElementById('chrStatus').style.background = 'rgba(239,68,68,0.1)';
+                        document.getElementById('chrStatus').style.color = '#ef4444';
+                        document.getElementById('chrStatus').textContent = 'HGNC file appears empty';
+                        return;
+                    }
+
+                    // Normalize header cells (trim, remove BOM, lowercase)
+                    const header = lines[0].split('\t').map(h => h.replace(/^\uFEFF/, '').trim().toLowerCase());
+
+                    const symbolCandidates = ['symbol', 'gene', 'approved symbol', 'hgnc symbol'];
+                    const locationCandidates = ['location', 'chromosome', 'chr', 'location_sortable'];
+
+                    let symbolIdx = header.findIndex(h => symbolCandidates.some(c => h.includes(c)));
+                    let locationIdx = header.findIndex(h => locationCandidates.some(c => h.includes(c)));
+
+                    // Fallback: if exact matches not found, try looser regex checks
+                    if (symbolIdx === -1) symbolIdx = header.findIndex(h => /symbol|gene/i.test(h));
+                    if (locationIdx === -1) locationIdx = header.findIndex(h => /chromosome|chr|location/i.test(h));
+
                     if (symbolIdx === -1 || locationIdx === -1) {
                         document.getElementById('chrStatus').className = 'chr-status';
                         document.getElementById('chrStatus').style.background = 'rgba(239,68,68,0.1)';
@@ -1180,15 +1199,26 @@
                         document.getElementById('chrStatus').textContent = 'Could not find symbol/location columns';
                         return;
                     }
+
                     chromosomeMap = {};
                     for (let i = 1; i < lines.length; i++) {
                         const cols = lines[i].split('\t');
                         if (cols.length > Math.max(symbolIdx, locationIdx)) {
                             const symbol = cols[symbolIdx].trim();
-                            const chrMatch = cols[locationIdx].trim().match(/^(\d+|X|Y|MT)/i);
-                            if (chrMatch) chromosomeMap[symbol] = chrMatch[1].toUpperCase();
+                            const locRaw = cols[locationIdx].trim();
+                            const chrMatch = locRaw.match(/(?:chr\s*)?(\d+|X|Y|MT)/i);
+                            if (symbol && chrMatch) chromosomeMap[symbol] = chrMatch[1].toUpperCase();
                         }
                     }
+
+                    if (Object.keys(chromosomeMap).length === 0) {
+                        document.getElementById('chrStatus').className = 'chr-status';
+                        document.getElementById('chrStatus').style.background = 'rgba(239,68,68,0.1)';
+                        document.getElementById('chrStatus').style.color = '#ef4444';
+                        document.getElementById('chrStatus').textContent = 'No chromosome mappings found in HGNC file';
+                        return;
+                    }
+
                     localStorage.setItem('chromosomeMap', JSON.stringify(chromosomeMap));
                     let updated = 0;
                     allGenes.forEach(g => { if (chromosomeMap[g.Gene]) { g.Chromosome = chromosomeMap[g.Gene]; updated++; } });
