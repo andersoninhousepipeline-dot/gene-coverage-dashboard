@@ -1165,7 +1165,7 @@
         }
 
         function loadBuiltInHGNC() {
-            fetch('data/hgnc_complete_set.txt')
+            fetch('https://raw.githubusercontent.com/andersoninhousepipeline-dot/gene-coverage-dashboard/main/data/hgnc_complete_set.txt')
                 .then(response => response.text())
                 .then(text => {
                     // Split lines in a CRLF-safe way and drop empty leading lines
