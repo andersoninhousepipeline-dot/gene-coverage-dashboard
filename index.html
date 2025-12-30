@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SURFseq Gene Coverage Dashboard</title>
+    <title>ADVAT SURFseq Gene Coverage</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -538,7 +538,7 @@
         <!-- Upload Screen -->
         <div class="upload-screen" id="uploadScreen">
             <div class="upload-logo">S</div>
-            <h1>SURFseq Gene Coverage</h1>
+                <h1>ADVAT SURFseq Gene Coverage</h1>
             <p>Upload your gene coverage Excel file to visualize and analyze the data with advanced filters</p>
             <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem;">
                 <button class="btn btn-primary" onclick="loadBuiltInGeneCoverage()">View Built-in Gene Coverage</button>
@@ -567,7 +567,7 @@
                 <div class="logo-section">
                     <div class="logo-icon">S</div>
                     <div class="title">
-                        <h1>SURFseq Gene Coverage</h1>
+                        <h1>ADVAT SURFseq Gene Coverage</h1>
                         <p>SURFseq Analysis Dashboard</p>
                     </div>
                 </div>
@@ -705,16 +705,7 @@
                             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                                 <button class="btn btn-primary" style="flex:1;" onclick="loadBuiltInHGNC()">View Built-in HGNC</button>
                             </div>
-                            <div class="file-upload">
-                                <input type="file" id="chrFile" accept=".tsv,.csv,.txt" onchange="loadChromosomeData(event)">
-                                <label for="chrFile" class="file-upload-label">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                    </svg>
-                                    Load HGNC Data (TXT)
-                                </label>
-                            </div>
+                            <!-- Custom HGNC upload removed per request -->
                             <div class="chr-status info" id="chrStatus">
                                 Download TXT from <a href="https://www.genenames.org/download/statistics-and-files/" target="_blank">genenames.org</a>
                             </div>
